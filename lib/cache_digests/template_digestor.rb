@@ -1,3 +1,5 @@
+require 'active_support/core_ext/array/access'
+
 module CacheDigests
   class TemplateDigestor
     EXPLICIT_DEPENDENCY = /<%# Template Dependency: ([^ ]+) %>/
