@@ -33,6 +33,24 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_explicit_dependency
+    assert_digest_difference("messages/show") do
+      change_template("messages/_message")
+    end
+  end
+
+  def test_second_level_dependency
+    assert_digest_difference("messages/show") do
+      change_template("comments/_comments")
+    end
+  end
+
+  def test_third_level_dependency
+    assert_digest_difference("messages/show") do
+      change_template("comments/_comment")
+    end
+  end
+
 
   private
     def assert_digest_difference(template_name)
