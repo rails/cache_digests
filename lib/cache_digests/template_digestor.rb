@@ -1,10 +1,6 @@
 require 'active_support/core_ext'
 require 'logger'
 
-class Object
-  def emerge() return yield self end
-end
-
 module CacheDigests
   class TemplateDigestor
     EXPLICIT_DEPENDENCY = /<%# Template Dependency: ([^ ]+) %>/
@@ -55,9 +51,8 @@ module CacheDigests
 
     def nested_dependencies
       dependencies.collect do |dependency|
-        TemplateDigestor.new(dependency, format, finder, partial: true).nested_dependencies.emerge do |dependencies|
-          dependencies.any? ? { dependency => dependencies } : dependency
-        end
+        dependencies = TemplateDigestor.new(dependency, format, finder, partial: true).nested_dependencies
+        dependencies.any? ? { dependency => dependencies } : dependency
       end
     end
 
