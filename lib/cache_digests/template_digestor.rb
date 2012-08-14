@@ -1,5 +1,7 @@
 require 'active_support/core_ext/array/access'
 require 'active_support/core_ext/class/attribute_accessors'
+require 'logger'
+require 'active_support/core_ext/object/try'
 
 module CacheDigests
   class TemplateDigestor
@@ -19,8 +21,8 @@ module CacheDigests
       (\"|\'){1}     # need closing quote of some kind to signify string-based template -- 4th capture
     /x
 
-    # Class-level cache for the digests. To clear the cache, just do TemplateDigestor.cache.clear
-    cattr_accessor(:cache) { Hash.new }
+    cattr_accessor(:cache)  { Hash.new }
+    cattr_accessor(:logger, instance_reader: true)
 
     def self.digest(name, format, finder, options = {})
       cache["#{name}.#{format}"] ||= new(name, format, finder, options).digest
@@ -33,13 +35,19 @@ module CacheDigests
     end
 
     def digest
-      Digest::MD5.hexdigest "#{name}.#{format}-#{source}-#{dependency_digest}"
+      Digest::MD5.hexdigest("#{name}.#{format}-#{source}-#{dependency_digest}").tap do |digest|
+        logger.try :info, "Cache digest for #{name}: #{digest}"
+      end
     end
 
 
     private
       def logical_name
         name.gsub(%r|/_|, "/")
+      end
+      
+      def directory
+        name.split("/").first
       end
 
       def partial?
@@ -48,6 +56,9 @@ module CacheDigests
 
       def source
         @source ||= finder.find(logical_name, [], partial?, formats: [ format ]).source
+      rescue ActionView::MissingTemplate
+        logger.try :info, "Couldn't find template for digesting: #{logical_name}"
+        ''
       end
 
 
@@ -62,7 +73,10 @@ module CacheDigests
       end
 
       def render_dependencies
-        source.scan(RENDER_DEPENDENCY).collect(&:third).uniq.reject { |template_name| template_name.include?("@") }
+        source.scan(RENDER_DEPENDENCY)
+          .collect(&:third).uniq
+          .reject  { |name| name.include?("@") }
+          .collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }
       end
 
       def explicit_dependencies

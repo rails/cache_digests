@@ -1,11 +1,18 @@
 require 'cache_digests/test_helper'
 require 'fileutils'
 
+module ActionView
+  class MissingTemplate < StandardError
+  end
+end
+
 class FixtureTemplate
   attr_reader :source
   
   def initialize(template_path)
     @source = File.read(template_path)
+  rescue Errno::ENOENT
+    raise ActionView::MissingTemplate
   end
 end
 
@@ -25,6 +32,7 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   
   def teardown
     FileUtils.rm_r FixtureFinder::TMP_DIR
+    CacheDigests::TemplateDigestor.cache.clear
   end
 
   def test_top_level_change_reflected
@@ -45,10 +53,26 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_second_level_dependency_within_same_directory
+    assert_digest_difference("messages/show") do
+      change_template("messages/_header")
+    end
+  end
+
   def test_third_level_dependency
     assert_digest_difference("messages/show") do
       change_template("comments/_comment")
     end
+  end
+
+  def test_logging_of_missing_template
+    log = StringIO.new
+    CacheDigests::TemplateDigestor.logger = Logger.new(log)
+
+    digest("messages/show")
+    
+    log.rewind
+    assert_match "Couldn't find template for digesting: messages/something_missing", log.read
   end
 
 
