@@ -73,10 +73,14 @@ module CacheDigests
       end
 
       def render_dependencies
-        source.scan(RENDER_DEPENDENCY)
-          .collect(&:third).uniq
-          .reject  { |name| name.include?("@") }
-          .collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }
+        source.scan(RENDER_DEPENDENCY).
+          collect(&:third).uniq.
+
+          # Can't infer dependency from render(@topic)
+          reject  { |name| name.include?("@") }.
+
+          # render("headline") => render("message/headline")
+          collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }
       end
 
       def explicit_dependencies
