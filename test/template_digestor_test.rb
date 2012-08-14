@@ -55,6 +55,7 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   private
     def assert_digest_difference(template_name)
       previous_digest = digest(template_name)
+      CacheDigests::TemplateDigestor.cache.clear
       yield
       assert previous_digest != digest(template_name)
     end

@@ -1,4 +1,5 @@
 require 'active_support/core_ext/array/access'
+require 'active_support/core_ext/class/attribute_accessors'
 
 module CacheDigests
   class TemplateDigestor
@@ -11,15 +12,18 @@ module CacheDigests
     #   render('comments/comments')
     RENDER_DEPENDENCY = /
       render\s?      # render, followed by an optional space
-      (partial:)?\s? # naming the partial, used with collection -- 1st capture
       \(?            # start a optional parenthesis for the render call
+      (partial:)?\s? # naming the partial, used with collection -- 1st capture
       (\"|\'){1}     # need starting quote of some kind to signify string-based template -- 2nd capture
       ([^'"]+)       # the template name itself -- 3rd capture
       (\"|\'){1}     # need closing quote of some kind to signify string-based template -- 4th capture
     /x
 
+    # Class-level cache for the digests. To clear the cache, just do TemplateDigestor.cache.clear
+    cattr_accessor(:cache) { Hash.new }
+
     def self.digest(name, format, finder, options = {})
-      new(name, format, finder, options).digest
+      cache["#{name}.#{format}"] ||= new(name, format, finder, options).digest
     end
 
     attr_reader :name, :format, :finder, :options
