@@ -15,10 +15,10 @@ module CacheDigests
     #   render(topics)         => render("topics/topic")
     #   render(message.topics) => render("topics/topic")
     RENDER_DEPENDENCY = /
-      render\s?      # render, followed by an optional space
-      \(?            # start a optional parenthesis for the render call
-      (partial:)?\s? # naming the partial, used with collection -- 1st capture
-      ([@a-z_\/\."']+)       # the template name itself -- 3rd capture
+      render\s?                # render, followed by an optional space
+      \(?                      # start a optional parenthesis for the render call
+      (partial:)?\s?           # naming the partial, used with collection -- 1st capture
+      ([@a-z"'][@a-z_\/\."']+) # the template name itself -- 2nd capture
     /x
 
     cattr_accessor(:cache)  { Hash.new }
