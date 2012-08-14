@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.version = '0.1.0'
   s.author  = 'David Heinemeier Hansson'
   s.email   = 'david@37signals.com'
-  s.summary = 'Nested fragment caches and ETags with (even) less situps'
+  s.summary = 'Nested fragment caches with (even) less situps'
 
   s.required_ruby_version = '>= 1.9'
 

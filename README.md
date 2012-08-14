@@ -3,7 +3,7 @@ Cache Digests
 
 Russian-doll caching schemes are hard to maintain when nested templates are updated. The manual approach works something like this:
 
-```ruby
+```HTML+ERB
 # app/views/projects/show.html.erb
 <% cache [ "v1", project ] do %>
   <h1>All documents</h1>
@@ -43,7 +43,7 @@ Enter Cache Digests: With this plugin, all calls to #cache in the view will auto
 
 Our code from above can just look like:
 
-```ruby
+```HTML+ERB
 # app/views/projects/show.html.erb
 <% cache project do %>
 ...
@@ -125,13 +125,13 @@ Explicit dependencies
 
 Some times you'll have template dependencies that can't be derived at all. This is typically the case when you have template rendering that happens in helpers. Here's an example:
 
-```ruby
+```HTML+ERB
 <%= render_sortable_todolists @project.todolists %>
 ```
 
 You'll need to use a special comment format to call those out:
 
-```ruby
+```HTML+ERB
 <%# Template Dependency: todolists/todolist %>
 <%= render_sortable_todolists @project.todolists %>
 ```
