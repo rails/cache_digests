@@ -94,7 +94,7 @@ module CacheDigests
           collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }.
           
           # replace quotes from string renders
-          collect { |name| name.gsub(%r|["']|, "") }
+          collect { |name| name.gsub(/["']/, "") }
       end
 
       def explicit_dependencies
