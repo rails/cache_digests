@@ -66,17 +66,25 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   end
 
   def test_logging_of_missing_template
-    log = StringIO.new
-    CacheDigests::TemplateDigestor.logger = Logger.new(log)
-
-    digest("messages/show")
-    
-    log.rewind
-    assert_match "Couldn't find template for digesting: messages/something_missing", log.read
+    assert_logged "Couldn't find template for digesting: messages/something_missing" do
+      digest("messages/show")
+    end
   end
 
 
   private
+    def assert_logged(message)
+      log = StringIO.new
+      CacheDigests::TemplateDigestor.logger = Logger.new(log)
+
+      yield
+      
+      log.rewind
+      assert_match message, log.read
+      
+      CacheDigests::TemplateDigestor.logger = nil
+    end
+
     def assert_digest_difference(template_name)
       previous_digest = digest(template_name)
       CacheDigests::TemplateDigestor.cache.clear
