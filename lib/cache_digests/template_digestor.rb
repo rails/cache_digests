@@ -1,7 +1,9 @@
-require 'active_support/core_ext/array/access'
-require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext'
 require 'logger'
-require 'active_support/core_ext/object/try'
+
+class Object
+  def emerge() return yield self end
+end
 
 module CacheDigests
   class TemplateDigestor
@@ -12,13 +14,15 @@ module CacheDigests
     #   render "comments/comments"
     #   render 'comments/comments'
     #   render('comments/comments')
+    #
+    #   render(@topic)         => render("topics/topic")
+    #   render(topics)         => render("topics/topic")
+    #   render(message.topics) => render("topics/topic")
     RENDER_DEPENDENCY = /
       render\s?      # render, followed by an optional space
       \(?            # start a optional parenthesis for the render call
       (partial:)?\s? # naming the partial, used with collection -- 1st capture
-      (\"|\'){1}     # need starting quote of some kind to signify string-based template -- 2nd capture
-      ([^'"]+)       # the template name itself -- 3rd capture
-      (\"|\'){1}     # need closing quote of some kind to signify string-based template -- 4th capture
+      ([@a-z_\/\."']+)       # the template name itself -- 3rd capture
     /x
 
     cattr_accessor(:cache)  { Hash.new }
@@ -41,6 +45,20 @@ module CacheDigests
     rescue ActionView::MissingTemplate
       logger.try :error, "Couldn't find template for digesting: #{name}.#{format}"
       ''
+    end
+
+    def dependencies
+      render_dependencies + explicit_dependencies
+    rescue ActionView::MissingTemplate
+      [] # File doesn't exist, so no dependencies
+    end
+
+    def nested_dependencies
+      dependencies.collect do |dependency|
+        TemplateDigestor.new(dependency, format, finder, partial: true).nested_dependencies.emerge do |dependencies|
+          dependencies.any? ? { dependency => dependencies } : dependency
+        end
+      end
     end
 
 
@@ -68,19 +86,20 @@ module CacheDigests
         end.join("-")
       end
 
-      def dependencies
-        render_dependencies + explicit_dependencies
-      end
-
       def render_dependencies
         source.scan(RENDER_DEPENDENCY).
-          collect(&:third).uniq.
+          collect(&:second).uniq.
 
-          # Can't infer dependency from render(@topic)
-          reject  { |name| name.include?("@") }.
+          # render(@topic)         => render("topics/topic")
+          # render(topics)         => render("topics/topic")
+          # render(message.topics) => render("topics/topic")
+          collect { |name| name.sub(/\A@?([a-z]+\.)*([a-z_]+)\z/) { "#{$2.pluralize}/#{$2.singularize}" } }.
 
           # render("headline") => render("message/headline")
-          collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }
+          collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }.
+          
+          # replace quotes from string renders
+          collect { |name| name.gsub(%r|["']|, "") }
       end
 
       def explicit_dependencies

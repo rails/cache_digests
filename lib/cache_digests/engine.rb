@@ -1,5 +1,5 @@
 module CacheDigests
-  class Railtie < ::Rails::Railtie
+  class Engine < ::Rails::Engine
     initializer 'cache_digests' do |app|
       require 'cache_digests'
 

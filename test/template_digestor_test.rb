@@ -81,6 +81,22 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     assert_equal '', digest("nothing/there")
   end
 
+  def test_collection_dependency
+    assert_digest_difference("messages/index") do
+      change_template("messages/_message")
+    end
+
+    assert_digest_difference("messages/index") do
+      change_template("events/_event")
+    end
+  end
+  
+  def test_collection_derived_from_record_dependency
+    assert_digest_difference("messages/show") do
+      change_template("events/_event")
+    end
+  end
+
 
   private
     def assert_logged(message)
@@ -98,8 +114,11 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     def assert_digest_difference(template_name)
       previous_digest = digest(template_name)
       CacheDigests::TemplateDigestor.cache.clear
+
       yield
+
       assert previous_digest != digest(template_name), "digest didn't change"
+      CacheDigests::TemplateDigestor.cache.clear
     end
   
     def digest(template_name)
