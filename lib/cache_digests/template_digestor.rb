@@ -57,7 +57,7 @@ module CacheDigests
       def source
         @source ||= finder.find(logical_name, [], partial?, formats: [ format ]).source
       rescue ActionView::MissingTemplate
-        logger.try :info, "Couldn't find template for digesting: #{logical_name}"
+        logger.try :error, "Couldn't find template for digesting: #{logical_name}"
         ''
       end
 
