@@ -21,7 +21,7 @@ class FixtureFinder
   TMP_DIR      = "#{File.dirname(__FILE__)}/tmp"
   
   def find(logical_name, keys, partial, options)
-    FixtureTemplate.new("#{TMP_DIR}/#{partial ? logical_name.gsub("/", "/_") : logical_name}.#{options[:formats].first}.erb")
+    FixtureTemplate.new("#{TMP_DIR}/#{partial ? logical_name.gsub(%r|/([^/]+)$|, '/_\1') : logical_name}.#{options[:formats].first}.erb")
   end
 end
 
@@ -66,9 +66,19 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   end
 
   def test_logging_of_missing_template
-    assert_logged "Couldn't find template for digesting: messages/something_missing" do
+    assert_logged "Couldn't find template for digesting: messages/something_missing.html" do
       digest("messages/show")
     end
+  end
+
+  def test_nested_template_directory
+    assert_digest_difference("messages/show") do
+      change_template("messages/actions/_move")
+    end
+  end
+  
+  def test_dont_generate_a_digest_for_missing_templates
+    assert_equal '', digest("nothing/there")
   end
 
 
@@ -89,7 +99,7 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       previous_digest = digest(template_name)
       CacheDigests::TemplateDigestor.cache.clear
       yield
-      assert previous_digest != digest(template_name)
+      assert previous_digest != digest(template_name), "digest didn't change"
     end
   
     def digest(template_name)
