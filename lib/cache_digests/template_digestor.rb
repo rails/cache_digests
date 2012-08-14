@@ -36,7 +36,7 @@ module CacheDigests
 
     def digest
       Digest::MD5.hexdigest("#{name}.#{format}-#{source}-#{dependency_digest}").tap do |digest|
-        logger.try :info, "Cache digest for #{name}: #{digest}"
+        logger.try :info, "Cache digest for #{name}.#{format}: #{digest}"
       end
     rescue ActionView::MissingTemplate
       logger.try :error, "Couldn't find template for digesting: #{name}.#{format}"
