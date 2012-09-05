@@ -6,9 +6,10 @@ module CacheDigests
       ActiveSupport.on_load :action_view do
         ActionView::Base.send :include, CacheDigests::FragmentHelper
       end
-      
+
       config.to_prepare do
         CacheDigests::TemplateDigestor.logger = Rails.logger
+        CACHED_DIGESTS.clear
       end
     end
   end
