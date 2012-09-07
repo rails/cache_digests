@@ -1,4 +1,5 @@
 require 'active_support/core_ext'
+require 'active_support/cache'
 require 'logger'
 
 module CacheDigests
@@ -15,17 +16,21 @@ module CacheDigests
     #   render(topics)         => render("topics/topic")
     #   render(message.topics) => render("topics/topic")
     RENDER_DEPENDENCY = /
-      render\s?                # render, followed by an optional space
-      \(?                      # start a optional parenthesis for the render call
-      (partial:)?\s?           # naming the partial, used with collection -- 1st capture
-      ([@a-z"'][@a-z_\/\."']+) # the template name itself -- 2nd capture
+      render\s*                     # render, followed by optional whitespace
+      \(?                           # start an optional parenthesis for the render call
+      (partial:|:partial\s+=>)?\s*  # naming the partial, used with collection -- 1st capture
+      ([@a-z"'][@a-z_\/\."']+)      # the template name itself -- 2nd capture
     /x
 
-    cattr_accessor(:cache)  { Hash.new }
+    cattr_accessor(:cache) { ActiveSupport::Cache::MemoryStore.new }
+    cattr_accessor(:cache_prefix)
+
     cattr_accessor(:logger, instance_reader: true)
 
     def self.digest(name, format, finder, options = {})
-      cache["#{name}.#{format}"] ||= new(name, format, finder, options).digest
+      cache.fetch([ "digestor", cache_prefix, name, format ].compact.join("/")) do
+        new(name, format, finder, options).digest
+      end
     end
 
     attr_reader :name, :format, :finder, :options
