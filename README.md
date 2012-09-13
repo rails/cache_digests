@@ -39,7 +39,7 @@ Now if I change app/views/comments/_comment.html.erb, I'll be forced to manually
 
 That puts a serious cramp in our rocking caching style.
 
-Enter Cache Digests: With this plugin, all calls to #cache in the view will automatically append a digest of that template _and_ all of it's dependencies! So you no longer need to manually increment versions in the specific templates you're working on or care about what other templates are depending on the change you make.
+Enter Cache Digests: With this plugin, all calls to #cache in the view will automatically append a digest of that template _and_ all of its dependencies! So you no longer need to manually increment versions in the specific templates you're working on or care about what other templates are depending on the change you make.
 
 Our code from above can just look like:
 
