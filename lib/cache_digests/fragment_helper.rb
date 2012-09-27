@@ -1,7 +1,7 @@
 module CacheDigests
   module FragmentHelper
     def fragment_name_with_digest(name)
-      [*key, TemplateDigestor.digest(@virtual_path, formats.last.to_sym, lookup_context)]
+      [*name, TemplateDigestor.digest(@virtual_path, formats.last.to_sym, lookup_context)]
     end
 
     private
