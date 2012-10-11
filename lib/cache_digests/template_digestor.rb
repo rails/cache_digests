@@ -68,9 +68,7 @@ module CacheDigests
       end
       
       def directory
-        split = name.split("/")
-        split.pop
-        split.join("/")
+        name.split("/")[0..-2].join("/")
       end
 
       def partial?
