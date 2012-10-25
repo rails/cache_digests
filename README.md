@@ -87,6 +87,7 @@ $ rake cache_digests:nested_dependencies TEMPLATE=projects/show
   }
 ]
 ```
+Note: this rake task doesn't differentiate between dependencies that are cached and dependencies that aren't - it is meant to show you all the dependencies of your view that cache_digests is able to derive.
 
 Implicit dependencies
 ---------------------
