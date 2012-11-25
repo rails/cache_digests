@@ -5,9 +5,16 @@ module CacheDigests
     end
 
     private
-      # Automatically include this template's digest -- and its childrens' -- in the cache key.
+      # Automatically include this template's digest -- and its childrens' --
+      # in the cache key. Cache digests can be skipped by either providing an
+      # explicitly versioned key (an Array-based key with the first key
+      # matching "v#" e.g. ['v3','my-key']) or by passing skip_digest: true to
+      # the options hash.
       def fragment_for(key, options = nil, &block)
-        if !explicitly_versioned_cache_key?(key)
+        skip_digest = explicitly_versioned_cache_key?(key) ||
+          (options && options.delete(:skip_digest))
+
+        if !skip_digest
           super fragment_name_with_digest(key), options, &block
         else
           super
