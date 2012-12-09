@@ -140,4 +140,4 @@ You'll need to use a special comment format to call those out:
 <%= render_sortable_todolists @project.todolists %>
 ```
 
-The pattern used to match these is /# Template Dependency: ([^ ]+)/, so it's important that you type it out just so. You can only declare one template dependency per line.
+The pattern used to match these is `/# Template Dependency: ([^ ]+)/`, so it's important that you type it out just so. You can only declare one template dependency per line.
