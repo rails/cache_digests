@@ -25,7 +25,7 @@ class DependencyTrackerTest < MiniTest::Unit::TestCase
 
   def test_finds_tracker_by_template_handler
     name = "boo/hoo"
-    template = FixtureTemplate.new("whatevs", :neckbeard)
+    template = FixtureTemplate.new(name, :neckbeard)
     dependencies = CacheDigests::DependencyTracker.find_dependencies(name, template)
     assert_equal ["foo/boo/hoo"], dependencies
   end
