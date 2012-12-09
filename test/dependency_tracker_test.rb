@@ -7,7 +7,7 @@ class NeckbeardTracker
 end
 
 class DependencyTrackerTest < MiniTest::Unit::TestCase
-  class FixtureTemplate
+  class FakeTemplate
     attr_reader :source, :handler
 
     def initialize(source, handler)
@@ -28,7 +28,7 @@ class DependencyTrackerTest < MiniTest::Unit::TestCase
   end
 
   def test_finds_tracker_by_template_handler
-    template = FixtureTemplate.new("boo/hoo", :neckbeard)
+    template = FakeTemplate.new("boo/hoo", :neckbeard)
     dependencies = tracker.find_dependencies("boo/hoo", template)
     assert_equal ["foo/boo/hoo"], dependencies
   end
