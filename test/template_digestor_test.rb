@@ -7,10 +7,11 @@ module ActionView
 end
 
 class FixtureTemplate
-  attr_reader :source
+  attr_reader :source, :handler
   
-  def initialize(template_path)
+  def initialize(template_path, handler = :erb)
     @source = File.read(template_path)
+    @handler = handler
   rescue Errno::ENOENT
     raise ActionView::MissingTemplate
   end
