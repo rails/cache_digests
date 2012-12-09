@@ -43,8 +43,6 @@ module CacheDigests
 
       def dependencies
         render_dependencies + explicit_dependencies
-      rescue ActionView::MissingTemplate
-        [] # File doesn't exist, so no dependencies
       end
 
       private
