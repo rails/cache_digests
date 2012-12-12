@@ -8,7 +8,7 @@ end
 
 class FixtureTemplate
   attr_reader :source
-  
+
   def initialize(template_path)
     @source = File.read(template_path)
   rescue Errno::ENOENT
@@ -16,20 +16,20 @@ class FixtureTemplate
   end
 end
 
-class FixtureFinder
+class FixtureFinder < Struct.new(:template_extension)
   FIXTURES_DIR = "#{File.dirname(__FILE__)}/fixtures"
   TMP_DIR      = "#{File.dirname(__FILE__)}/tmp"
-  
+
   def find(logical_name, keys, partial, options)
-    FixtureTemplate.new("#{TMP_DIR}/#{partial ? logical_name.gsub(%r|/([^/]+)$|, '/_\1') : logical_name}.#{options[:formats].first}.erb")
+    FixtureTemplate.new("#{TMP_DIR}/#{partial ? logical_name.gsub(%r|/([^/]+)$|, '/_\1') : logical_name}.#{options[:formats].first}.#{template_extension}")
   end
 end
 
-class TemplateDigestorTest < MiniTest::Unit::TestCase
+module TemplateDigestorTest
   def setup
-    FileUtils.cp_r FixtureFinder::FIXTURES_DIR, FixtureFinder::TMP_DIR
+    FileUtils.cp_r "#{FixtureFinder::FIXTURES_DIR}/#{template_extension}", FixtureFinder::TMP_DIR
   end
-  
+
   def teardown
     FileUtils.rm_r FixtureFinder::TMP_DIR
     CacheDigests::TemplateDigestor.cache.clear
@@ -64,7 +64,7 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       change_template("comments/_comment")
     end
   end
-  
+
   def test_directory_depth_dependency
     assert_digest_difference("level/below/index") do
       change_template("level/below/_header")
@@ -82,7 +82,7 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       change_template("messages/actions/_move")
     end
   end
-  
+
   def test_dont_generate_a_digest_for_missing_templates
     assert_equal '', digest("nothing/there")
   end
@@ -96,7 +96,7 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       change_template("events/_event")
     end
   end
-  
+
   def test_collection_derived_from_record_dependency
     assert_digest_difference("messages/show") do
       change_template("events/_event")
@@ -110,10 +110,10 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       CacheDigests::TemplateDigestor.logger = Logger.new(log)
 
       yield
-      
+
       log.rewind
       assert_match message, log.read
-      
+
       CacheDigests::TemplateDigestor.logger = nil
     end
 
@@ -126,14 +126,30 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       assert previous_digest != digest(template_name), "digest didn't change"
       CacheDigests::TemplateDigestor.cache.clear
     end
-  
+
     def digest(template_name)
-      CacheDigests::TemplateDigestor.digest(template_name, :html, FixtureFinder.new)
+      CacheDigests::TemplateDigestor.digest(template_name, :html, FixtureFinder.new(template_extension))
     end
-    
+
     def change_template(template_name)
-      File.open("#{FixtureFinder::TMP_DIR}/#{template_name}.html.erb", "w") do |f|
+      File.open("#{FixtureFinder::TMP_DIR}/#{template_name}.html.#{template_extension}", "w") do |f|
         f.write "\nTHIS WAS CHANGED!"
       end
     end
+end
+
+class ErbTemplateDigestorTest < MiniTest::Unit::TestCase
+  include TemplateDigestorTest
+
+  def template_extension
+    "erb"
+  end
+end
+
+class HamlTemplateDigestorTest < MiniTest::Unit::TestCase
+  include TemplateDigestorTest
+
+  def template_extension
+    "haml"
+  end
 end
