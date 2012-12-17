@@ -63,6 +63,9 @@ Our code from above can just look like:
 
 The caching key for app/views/projects/show.html.erb will be something like `views/projects/605816632-20120810191209/d9fb66b120b61f46707c67ab41d93cb2`. That last bit is a MD5 of the template file itself and all of its dependencies. It'll change if you change either the template or any of the dependencies, and thus allow the cache to expire automatically.
 
+Note that if your application cache is enabled, the template digest will not be recomputed until you restart your application and you will have to restart the app whenever you change template code.
+For development environment you might want to cache your fragments AND have dependent partials changes detected (with the penalty of recomputing the digests for each request). For that you can add `CacheDigests::TemplateDigestor.cache = ActiveSupport::Cache::NullStore.new` to your development configuration
+
 You can use these handy rake tasks to see how deep the rabbit hole goes:
 
 ```
