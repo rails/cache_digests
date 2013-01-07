@@ -32,7 +32,6 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   
   def teardown
     FileUtils.rm_r FixtureFinder::TMP_DIR
-    CacheDigests.dependencies.clear
     CacheDigests::TemplateDigestor.cache.clear
     CacheDigests::TemplateDigestor.cache_prefix = nil
   end

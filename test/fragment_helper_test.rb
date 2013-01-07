@@ -10,10 +10,11 @@ class Fragmenter
 end
 
 class BaseFragmenter
-  attr_accessor :virtual_path, :formats, :lookup_context
+  attr_accessor :virtual_path, :formats, :lookup_context, :view_dependencies
   def initialize
     @virtual_path = ''
     @formats = [:html]
+    @view_dependencies = []
   end
 
   private
@@ -39,7 +40,6 @@ class FragmentHelperTest < MiniTest::Unit::TestCase
   def teardown
     CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest, &@old_digest)
     @fragmenter = nil
-    CacheDigests.dependencies.clear
   end
 
   def test_passes_correct_parameters_to_digestor
@@ -53,18 +53,17 @@ class FragmentHelperTest < MiniTest::Unit::TestCase
     fragmenter.virtual_path = 'path'
     fragmenter.formats = ['formats']
     fragmenter.lookup_context = 'lookup context'
-    CacheDigests.dependencies << "foo"
 
-    fragmenter.fragment_name_with_digest("key")
+    fragmenter.fragment_name_with_digest("key", ["foo"])
   end
 
   def test_appends_the_key_with_digest
-    key_with_digest = fragmenter.fragment_name_with_digest("key")
+    key_with_digest = fragmenter.fragment_name_with_digest("key", [])
     assert_equal ['key', 'digest'], key_with_digest
   end
 
   def test_appends_the_array_key_with_digest
-    key_with_digest = fragmenter.fragment_name_with_digest(["key1", "key2"])
+    key_with_digest = fragmenter.fragment_name_with_digest(["key1", "key2"], [])
     assert_equal ['key1', 'key2', 'digest'], key_with_digest
   end
 
