@@ -83,6 +83,10 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     end
   end
   
+  def test_recursion_in_renders
+    assert digest("level/recursion")
+  end
+  
   def test_dont_generate_a_digest_for_missing_templates
     assert_equal '', digest("nothing/there")
   end
