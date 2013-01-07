@@ -63,7 +63,6 @@ module CacheDigests
       end
     end
 
-
     private
       def logical_name
         name.gsub(%r|/_|, "/")
@@ -105,7 +104,8 @@ module CacheDigests
       end
 
       def explicit_dependencies
-        source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+        source.scan(EXPLICIT_DEPENDENCY).flatten.uniq +
+          Array.wrap(options[:dependencies])
       end
   end
 end

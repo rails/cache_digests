@@ -1,7 +1,10 @@
 module CacheDigests
+  mattr_reader :dependencies
+  @@dependencies = []
+
   module FragmentHelper
     def fragment_name_with_digest(name)
-      [*name, TemplateDigestor.digest(@virtual_path, formats.last.to_sym, lookup_context)]
+      [*name, TemplateDigestor.digest(@virtual_path, formats.last.to_sym, lookup_context, dependencies: CacheDigests.dependencies)]
     end
 
     private

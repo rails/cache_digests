@@ -32,7 +32,9 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   
   def teardown
     FileUtils.rm_r FixtureFinder::TMP_DIR
+    CacheDigests.dependencies.clear
     CacheDigests::TemplateDigestor.cache.clear
+    CacheDigests::TemplateDigestor.cache_prefix = nil
   end
 
   def test_top_level_change_reflected
@@ -45,6 +47,20 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     assert_digest_difference("messages/show") do
       change_template("messages/_message")
     end
+  end
+
+  def test_explicit_dependency_via_options
+    before = digest("messages/show")
+    after  = digest("messages/show", dependencies: ["arbitrary"])
+    assert before == after, "digest should have been cached, and not changed"
+
+    CacheDigests::TemplateDigestor.cache_prefix = "1"
+    after  = digest("messages/show")
+    assert before == after, "digest should not have changed (no new dependencies)"
+
+    CacheDigests::TemplateDigestor.cache_prefix = "2"
+    after  = digest("messages/show", dependencies: ["arbitrary"])
+    assert before != after, "digest should have changed"
   end
 
   def test_second_level_dependency
@@ -131,8 +147,8 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
       CacheDigests::TemplateDigestor.cache.clear
     end
   
-    def digest(template_name)
-      CacheDigests::TemplateDigestor.digest(template_name, :html, FixtureFinder.new)
+    def digest(template_name, options={})
+      CacheDigests::TemplateDigestor.digest(template_name, :html, FixtureFinder.new, options)
     end
     
     def change_template(template_name)

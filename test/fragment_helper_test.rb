@@ -32,25 +32,28 @@ class FragmentHelperTest < MiniTest::Unit::TestCase
   def setup
     # would love some mocha here
     @old_digest = CacheDigests::TemplateDigestor.method(:digest)
-    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc|
+    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc,o={}|
       "digest"
     end
   end
   def teardown
     CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest, &@old_digest)
     @fragmenter = nil
+    CacheDigests.dependencies.clear
   end
 
   def test_passes_correct_parameters_to_digestor
-    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc|
+    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc,o={}|
       extend MiniTest::Assertions
       assert_equal 'path', p
       assert_equal :formats, f
       assert_equal 'lookup context', lc
+      assert_equal({dependencies:["foo"]}, o)
     end
     fragmenter.virtual_path = 'path'
     fragmenter.formats = ['formats']
     fragmenter.lookup_context = 'lookup context'
+    CacheDigests.dependencies << "foo"
 
     fragmenter.fragment_name_with_digest("key")
   end
