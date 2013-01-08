@@ -28,7 +28,7 @@ module CacheDigests
     cattr_accessor(:logger, instance_reader: true)
 
     def self.digest(name, format, finder, options = {})
-      cache_key = [ "digestor", cache_prefix, name, format ].compact.join("/")
+      cache_key = [ "digestor", cache_prefix, name, format, *Array.wrap(options[:dependencies]) ].compact.join("/")
       cache.fetch(cache_key) do
         cache.write(cache_key, nil) # Prevent re-entry
         new(name, format, finder, options).digest
@@ -67,7 +67,7 @@ module CacheDigests
       def logical_name
         name.gsub(%r|/_|, "/")
       end
-      
+
       def directory
         name.split("/")[0..-2].join("/")
       end
@@ -82,9 +82,11 @@ module CacheDigests
 
 
       def dependency_digest
-        dependencies.collect do |template_name|
+        template_digests = dependencies.collect do |template_name|
           TemplateDigestor.digest(template_name, format, finder, partial: true)
-        end.join("-")
+        end
+
+        (template_digests + injected_dependencies).join("-")
       end
 
       def render_dependencies
@@ -98,14 +100,17 @@ module CacheDigests
 
           # render("headline") => render("message/headline")
           collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }.
-          
+
           # replace quotes from string renders
           collect { |name| name.gsub(/["']/, "") }
       end
 
       def explicit_dependencies
-        source.scan(EXPLICIT_DEPENDENCY).flatten.uniq +
-          Array.wrap(options[:dependencies])
+        source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
+      end
+
+      def injected_dependencies
+        Array.wrap(options[:dependencies])
       end
   end
 end
