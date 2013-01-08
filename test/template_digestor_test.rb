@@ -49,17 +49,17 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
   end
 
   def test_explicit_dependency_via_options
-    before = digest("messages/show")
-    after  = digest("messages/show", dependencies: ["arbitrary"])
-    assert before == after, "digest should have been cached, and not changed"
+    plain        = digest("messages/show")
+    fridge       = digest("messages/show", dependencies: ["fridge"])
+    phone        = digest("messages/show", dependencies: ["phone"])
+    fridge_phone = digest("messages/show", dependencies: ["fridge", "phone"])
 
-    CacheDigests::TemplateDigestor.cache_prefix = "1"
-    after  = digest("messages/show")
-    assert before == after, "digest should not have changed (no new dependencies)"
-
-    CacheDigests::TemplateDigestor.cache_prefix = "2"
-    after  = digest("messages/show", dependencies: ["arbitrary"])
-    assert before != after, "digest should have changed"
+    assert plain != fridge
+    assert plain != phone
+    assert plain != fridge_phone
+    assert fridge != phone
+    assert fridge != fridge_phone
+    assert phone != fridge_phone
   end
 
   def test_second_level_dependency

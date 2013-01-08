@@ -19,9 +19,7 @@ module CacheDigests
           (options && options.delete(:skip_digest))
 
         if !skip_digest
-          with_cache_prefix view_cache_dependencies do |dependencies|
-            super fragment_name_with_digest(key, dependencies), options, &block
-          end
+          super fragment_name_with_digest(key, view_cache_dependencies), options, &block
         else
           super
         end
@@ -29,25 +27,6 @@ module CacheDigests
 
       def explicitly_versioned_cache_key?(key)
         key.is_a?(Array) && key.first =~ /\Av\d+\Z/
-      end
-
-      # If view dependencies have been specified programmatically, we need
-      # to also set a new cache_prefix, so that the previously cached cache digest
-      # is not used. (Dependencies are not used to build the digest's cache key.)
-      def with_cache_prefix(dependencies)
-        if dependencies.any?
-          old_prefix = CacheDigests::TemplateDigestor.cache_prefix
-          new_prefix = dependencies.join('.')
-
-          begin
-            CacheDigests::TemplateDigestor.cache_prefix = new_prefix
-            yield dependencies
-          ensure
-            CacheDigests::TemplateDigestor.cache_prefix = old_prefix
-          end
-        else
-          yield dependencies
-        end
       end
   end
 end
