@@ -10,10 +10,11 @@ class Fragmenter
 end
 
 class BaseFragmenter
-  attr_accessor :virtual_path, :formats, :lookup_context
+  attr_accessor :virtual_path, :formats, :lookup_context, :view_cache_dependencies
   def initialize
     @virtual_path = ''
     @formats = [:html]
+    @view_cache_dependencies = []
   end
 
   private
@@ -32,7 +33,7 @@ class FragmentHelperTest < MiniTest::Unit::TestCase
   def setup
     # would love some mocha here
     @old_digest = CacheDigests::TemplateDigestor.method(:digest)
-    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc|
+    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc,o={}|
       "digest"
     end
   end
@@ -42,26 +43,27 @@ class FragmentHelperTest < MiniTest::Unit::TestCase
   end
 
   def test_passes_correct_parameters_to_digestor
-    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc|
+    CacheDigests::TemplateDigestor.send(:define_singleton_method, :digest) do |p,f,lc,o={}|
       extend MiniTest::Assertions
       assert_equal 'path', p
       assert_equal :formats, f
       assert_equal 'lookup context', lc
+      assert_equal({dependencies:["foo"]}, o)
     end
     fragmenter.virtual_path = 'path'
     fragmenter.formats = ['formats']
     fragmenter.lookup_context = 'lookup context'
 
-    fragmenter.fragment_name_with_digest("key")
+    fragmenter.fragment_name_with_digest("key", ["foo"])
   end
 
   def test_appends_the_key_with_digest
-    key_with_digest = fragmenter.fragment_name_with_digest("key")
+    key_with_digest = fragmenter.fragment_name_with_digest("key", [])
     assert_equal ['key', 'digest'], key_with_digest
   end
 
   def test_appends_the_array_key_with_digest
-    key_with_digest = fragmenter.fragment_name_with_digest(["key1", "key2"])
+    key_with_digest = fragmenter.fragment_name_with_digest(["key1", "key2"], [])
     assert_equal ['key1', 'key2', 'digest'], key_with_digest
   end
 
