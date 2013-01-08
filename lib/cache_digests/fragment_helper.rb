@@ -11,14 +11,15 @@ module CacheDigests
       # matching "v#" e.g. ['v3','my-key']) or by passing skip_digest: true to
       # the options hash.
       #
-      # "view_dependencies" method is a helper defined in the ViewDependency
-      # module, which is declared as a helper by the controller.
+      # "view_cache_dependencies" method is a helper defined in the
+      # ViewCacheDependency module, which is declared as a helper by the
+      # controller.
       def fragment_for(key, options = nil, &block)
         skip_digest = explicitly_versioned_cache_key?(key) ||
           (options && options.delete(:skip_digest))
 
         if !skip_digest
-          with_cache_prefix view_dependencies do |dependencies|
+          with_cache_prefix view_cache_dependencies do |dependencies|
             super fragment_name_with_digest(key, dependencies), options, &block
           end
         else

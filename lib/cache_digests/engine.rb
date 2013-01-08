@@ -8,7 +8,7 @@ module CacheDigests
       end
 
       ActiveSupport.on_load :action_controller do
-        ActionController::Base.send :include, CacheDigests::ViewDependency
+        ActionController::Base.send :include, CacheDigests::ViewCacheDependency
       end
 
       config.to_prepare do

@@ -10,11 +10,11 @@ class Fragmenter
 end
 
 class BaseFragmenter
-  attr_accessor :virtual_path, :formats, :lookup_context, :view_dependencies
+  attr_accessor :virtual_path, :formats, :lookup_context, :view_cache_dependencies
   def initialize
     @virtual_path = ''
     @formats = [:html]
-    @view_dependencies = []
+    @view_cache_dependencies = []
   end
 
   private
