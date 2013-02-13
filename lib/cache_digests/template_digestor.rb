@@ -4,7 +4,7 @@ require 'logger'
 
 module CacheDigests
   class TemplateDigestor
-    EXPLICIT_DEPENDENCY = /# Template Dependency: ([^ ]+)/
+    EXPLICIT_DEPENDENCY = /# Template Dependency: (\S+)/
 
     # Matches:
     #   render partial: "comments/comment", collection: commentable.comments
