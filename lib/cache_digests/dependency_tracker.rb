@@ -1,6 +1,8 @@
+require 'thread_safe'
+
 module CacheDigests
   class DependencyTracker
-    @trackers = Hash.new
+    @trackers = ThreadSafe::Cache.new
 
     def self.find_dependencies(name, template)
       @trackers.fetch(template.handler).call(name, template)
