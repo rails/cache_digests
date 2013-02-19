@@ -84,7 +84,5 @@ module CacheDigests
           source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
         end
     end
-
-    register_tracker(:erb, ERBTracker)
   end
 end

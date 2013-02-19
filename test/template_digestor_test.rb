@@ -29,12 +29,14 @@ end
 class TemplateDigestorTest < MiniTest::Unit::TestCase
   def setup
     FileUtils.cp_r FixtureFinder::FIXTURES_DIR, FixtureFinder::TMP_DIR
+    CacheDigests::DependencyTracker.register_tracker :erb, CacheDigests::DependencyTracker::ERBTracker
   end
   
   def teardown
     FileUtils.rm_r FixtureFinder::TMP_DIR
     CacheDigests::TemplateDigestor.cache.clear
     CacheDigests::TemplateDigestor.cache_prefix = nil
+    CacheDigests::DependencyTracker.remove_tracker :erb
   end
 
   def test_top_level_change_reflected
