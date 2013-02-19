@@ -32,4 +32,10 @@ class DependencyTrackerTest < MiniTest::Unit::TestCase
     dependencies = tracker.find_dependencies("boo/hoo", template)
     assert_equal ["foo/boo/hoo"], dependencies
   end
+
+  def test_returns_empty_array_if_no_tracker_registered_for_handler
+    template = FakeTemplate.new("boo/hoo", :hater)
+    dependencies = tracker.find_dependencies("boo/hoo", template)
+    assert_equal [], dependencies
+  end
 end

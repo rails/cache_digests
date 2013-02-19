@@ -5,7 +5,13 @@ module CacheDigests
     @trackers = ThreadSafe::Cache.new
 
     def self.find_dependencies(name, template)
-      @trackers.fetch(template.handler).call(name, template)
+      tracker = @trackers[template.handler]
+
+      if tracker.present?
+        tracker.call(name, template)
+      else
+        []
+      end
     end
 
     def self.register_tracker(handler, tracker)
