@@ -6,7 +6,9 @@ module CacheDigests
       ActiveSupport.on_load :action_view do
         ActionView::Base.send :include, CacheDigests::FragmentHelper
 
-        DependencyTracker.register_tracker(Template::Handlers::ERB, ERBTracker)
+        handler = ActionView::Template::Handlers::ERB
+        tracker = DependencyTracker::ERBTracker
+        DependencyTracker.register_tracker(handler, tracker)
       end
 
       ActiveSupport.on_load :action_controller do
