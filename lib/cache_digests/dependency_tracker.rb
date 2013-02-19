@@ -18,7 +18,7 @@ module CacheDigests
       @trackers[handler] = tracker
     end
 
-    def self.unregister_tracker(handler)
+    def self.remove_tracker(handler)
       @trackers.delete(handler)
     end
 

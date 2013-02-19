@@ -24,7 +24,7 @@ class DependencyTrackerTest < MiniTest::Unit::TestCase
   end
 
   def teardown
-    tracker.unregister_tracker(:neckbeard)
+    tracker.remove_tracker(:neckbeard)
   end
 
   def test_finds_tracker_by_template_handler
