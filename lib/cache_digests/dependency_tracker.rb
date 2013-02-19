@@ -22,7 +22,7 @@ module CacheDigests
       @trackers.delete(handler)
     end
 
-    class ErbTracker
+    class ERBTracker
       EXPLICIT_DEPENDENCY = /# Template Dependency: (\S+)/
 
       # Matches:
@@ -85,6 +85,6 @@ module CacheDigests
         end
     end
 
-    register_tracker(:erb, ErbTracker)
+    register_tracker(:erb, ERBTracker)
   end
 end
