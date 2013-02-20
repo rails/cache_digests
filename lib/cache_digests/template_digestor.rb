@@ -1,27 +1,10 @@
 require 'active_support/core_ext'
 require 'active_support/cache'
 require 'logger'
+require 'cache_digests/dependency_tracker'
 
 module CacheDigests
   class TemplateDigestor
-    EXPLICIT_DEPENDENCY = /# Template Dependency: (\S+)/
-
-    # Matches:
-    #   render partial: "comments/comment", collection: commentable.comments
-    #   render "comments/comments"
-    #   render 'comments/comments'
-    #   render('comments/comments')
-    #
-    #   render(@topic)         => render("topics/topic")
-    #   render(topics)         => render("topics/topic")
-    #   render(message.topics) => render("topics/topic")
-    RENDER_DEPENDENCY = /
-      render\s*                     # render, followed by optional whitespace
-      \(?                           # start an optional parenthesis for the render call
-      (partial:|:partial\s+=>)?\s*  # naming the partial, used with collection -- 1st capture
-      ([@a-z"'][@a-z_\/\."']+)      # the template name itself -- 2nd capture
-    /x
-
     cattr_accessor(:cache) { ActiveSupport::Cache::MemoryStore.new }
     cattr_accessor(:cache_prefix)
 
@@ -51,7 +34,7 @@ module CacheDigests
     end
 
     def dependencies
-      render_dependencies + explicit_dependencies
+      DependencyTracker.find_dependencies(name, template)
     rescue ActionView::MissingTemplate
       [] # File doesn't exist, so no dependencies
     end
@@ -68,18 +51,17 @@ module CacheDigests
         name.gsub(%r|/_|, "/")
       end
 
-      def directory
-        name.split("/")[0..-2].join("/")
-      end
-
       def partial?
         options[:partial] || name.include?("/_")
       end
 
       def source
-        @source ||= finder.find(logical_name, [], partial?, formats: [ format ]).source
+        template.source
       end
 
+      def template
+        @template ||= finder.find(logical_name, [], partial?, formats: [ format ])
+      end
 
       def dependency_digest
         template_digests = dependencies.collect do |template_name|
@@ -87,26 +69,6 @@ module CacheDigests
         end
 
         (template_digests + injected_dependencies).join("-")
-      end
-
-      def render_dependencies
-        source.scan(RENDER_DEPENDENCY).
-          collect(&:second).uniq.
-
-          # render(@topic)         => render("topics/topic")
-          # render(topics)         => render("topics/topic")
-          # render(message.topics) => render("topics/topic")
-          collect { |name| name.sub(/\A@?([a-z]+\.)*([a-z_]+)\z/) { "#{$2.pluralize}/#{$2.singularize}" } }.
-
-          # render("headline") => render("message/headline")
-          collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }.
-
-          # replace quotes from string renders
-          collect { |name| name.gsub(/["']/, "") }
-      end
-
-      def explicit_dependencies
-        source.scan(EXPLICIT_DEPENDENCY).flatten.uniq
       end
 
       def injected_dependencies
