@@ -14,7 +14,8 @@ module CacheDigests
       end
     end
 
-    def self.register_tracker(handler, tracker)
+    def self.register_tracker(extension, tracker)
+      handler = ActionView::Template.handler_for_extension(extension)
       @trackers[handler] = tracker
     end
 

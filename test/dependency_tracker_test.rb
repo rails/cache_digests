@@ -6,6 +6,14 @@ class NeckbeardTracker
   end
 end
 
+module ActionView
+  class Template
+    def self.handler_for_extension(extension)
+      extension
+    end
+  end
+end
+
 class DependencyTrackerTest < MiniTest::Unit::TestCase
   class FakeTemplate
     attr_reader :source, :handler

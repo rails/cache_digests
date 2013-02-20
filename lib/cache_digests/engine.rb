@@ -13,10 +13,7 @@ module CacheDigests
 
       config.to_prepare do
         CacheDigests::TemplateDigestor.logger = Rails.logger
-
-        handler = ActionView::Template.handler_for_extension(:erb)
-        tracker = DependencyTracker::ERBTracker
-        DependencyTracker.register_tracker(handler, tracker)
+        DependencyTracker.register_tracker :erb, DependencyTracker::ERBTracker
       end
     end
   end
