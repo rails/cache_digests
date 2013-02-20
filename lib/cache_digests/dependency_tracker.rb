@@ -60,7 +60,7 @@ module CacheDigests
         def source
           template.source
         end
-        
+
         def directory
           name.split("/")[0..-2].join("/")
         end
@@ -76,7 +76,7 @@ module CacheDigests
 
             # render("headline") => render("message/headline")
             collect { |name| name.include?("/") ? name : "#{directory}/#{name}" }.
-            
+
             # replace quotes from string renders
             collect { |name| name.gsub(/["']/, "") }
         end
