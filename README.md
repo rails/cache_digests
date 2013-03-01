@@ -141,3 +141,15 @@ You'll need to use a special comment format to call those out:
 ```
 
 The pattern used to match these is `/# Template Dependency: ([^ ]+)/`, so it's important that you type it out just so. You can only declare one template dependency per line.
+
+External dependencies
+---------------------
+
+If you use a helper method, for example, inside of a cached block and you then update that helper, you'll have to bump the cache as well. It doesn't really matter how you do it, but the md5 of the template file must change. One recommendation is to simply be explicit in a comment, like:
+
+```HTML+ERB
+<%# Helper Dependency Updated: May 6, 2012 at 6pm %>
+<%= some_helper_method(person) %>
+```
+
+Now all you'll have to do is change that timestamp when the helper method changes.
