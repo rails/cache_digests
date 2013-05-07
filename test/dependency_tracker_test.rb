@@ -46,4 +46,12 @@ class DependencyTrackerTest < MiniTest::Unit::TestCase
     dependencies = tracker.find_dependencies("boo/hoo", template)
     assert_equal [], dependencies
   end
+
+  def test_dependency_of_erb_template_with_number_in_filename
+    tracker.register_tracker(:erb, CacheDigests::DependencyTracker::ERBTracker)
+    template = FakeTemplate.new("<%# render 'messages/message123' %>", :erb)
+    dependencies = tracker.find_dependencies("messages/message123", template)
+    assert_equal ["messages/message123"], dependencies
+    tracker.remove_tracker(:erb)
+  end
 end
