@@ -148,12 +148,15 @@ Supported Templating Languages
 
 Only ERB is officially supported by the dependency tracker, but the ERB Tracker may work with other formats.
 
-Add this initializer to enable HAML support and check the results with `rake cache_digests:dependencies`
+Add this initializer to enable HAML or Slim support and check the results with `rake cache_digests:dependencies`
 
 ```ruby
 # config/initializers/cache_digests.rb
 
 # Enable experimental HAML support with the ERB Dependency Tracker
 CacheDigests::DependencyTracker.register_tracker :haml, CacheDigests::DependencyTracker::ERBTracker
+
+# Enable experimental Slim support with the ERB Dependency Tracker
+  CacheDigests::DependencyTracker.register_tracker :slim, CacheDigests::DependencyTracker::ERBTracker
 ```
 
