@@ -5,6 +5,9 @@ module CacheDigests
 
       ActiveSupport.on_load :action_view do
         ActionView::Base.send :include, CacheDigests::FragmentHelper
+        unless ActionView::Base.cache_template_loading
+          CacheDigests::TemplateDigestor.cache = ActiveSupport::Cache::NullStore.new
+        end
       end
 
       ActiveSupport.on_load :action_controller do

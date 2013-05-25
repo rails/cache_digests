@@ -63,9 +63,6 @@ Our code from above can just look like:
 
 The caching key for app/views/projects/show.html.erb will be something like `views/projects/605816632-20120810191209/d9fb66b120b61f46707c67ab41d93cb2`. That last bit is a MD5 of the template file itself and all of its dependencies. It'll change if you change either the template or any of the dependencies, and thus allow the cache to expire automatically.
 
-Note that if your application cache is enabled, the template digest will not be recomputed until you restart your application and you will have to restart the app whenever you change template code.
-For development environment you might want to cache your fragments AND have dependent partials changes detected (with the penalty of recomputing the digests for each request). For that you can add `CacheDigests::TemplateDigestor.cache = ActiveSupport::Cache::NullStore.new` to your development configuration
-
 You can use these handy rake tasks to see how deep the rabbit hole goes:
 
 ```
@@ -91,6 +88,13 @@ $ rake cache_digests:nested_dependencies TEMPLATE=projects/show
 ]
 ```
 Note: this rake task doesn't differentiate between dependencies that are cached and dependencies that aren't - it is meant to show you all the dependencies of your view that cache_digests is able to derive.
+
+Recomputing digests after updating a template
+---------------------------------------------
+
+If your application's environment has caching enabled with `config.action_view.cache_template_loading` (e.g. production) then template digests are only computed once and saved until the application is restarted. Any updates to a template will require an application restart in order for the template source and digest changes to be reflected. If `config.action_view.cache_template_loading` is unset then it is set to the value of `config.cache_classes` by default.
+
+For environments that do not enable `config.action_view.cache_template_loading` (e.g. development) the default `CacheDigests::TemplateDigestor.cache` store is set to `ActiveSupport::Cache::NullStore.new`. This cache implementation doesn't actually store anything which forces template digests to recompute on every request. This is useful for cases where you want to test fragment caching (by enabling `config.action_controller.perform_caching`) or add template digests to your ETags with [rails/etagger](https://github.com/rails/etagger) but still allow templates and digests to reload any time a template is changed.
 
 Implicit dependencies
 ---------------------
