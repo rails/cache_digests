@@ -58,12 +58,12 @@ class FragmentHelperTest < MiniTest::Unit::TestCase
   end
 
   def test_appends_the_key_with_digest
-    key_with_digest = fragmenter.fragment_name_with_digest("key", [])
+    key_with_digest = fragmenter.fragment_name_with_digest("key")
     assert_equal ['key', 'digest'], key_with_digest
   end
 
   def test_appends_the_array_key_with_digest
-    key_with_digest = fragmenter.fragment_name_with_digest(["key1", "key2"], [])
+    key_with_digest = fragmenter.fragment_name_with_digest(["key1", "key2"])
     assert_equal ['key1', 'key2', 'digest'], key_with_digest
   end
 
