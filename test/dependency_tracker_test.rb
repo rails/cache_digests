@@ -14,15 +14,15 @@ module ActionView
   end
 end
 
-class DependencyTrackerTest < MiniTest::Unit::TestCase
-  class FakeTemplate
-    attr_reader :source, :handler
+class FakeTemplate
+  attr_reader :source, :handler
 
-    def initialize(source, handler)
-      @source, @handler = source, handler
-    end
+  def initialize(source, handler)
+    @source, @handler = source, handler
   end
+end
 
+class DependencyTrackerTest < MiniTest::Unit::TestCase
   def tracker
     CacheDigests::DependencyTracker
   end
@@ -46,12 +46,32 @@ class DependencyTrackerTest < MiniTest::Unit::TestCase
     dependencies = tracker.find_dependencies("boo/hoo", template)
     assert_equal [], dependencies
   end
+end
+
+class ERBTrackerTest < MiniTest::Unit::TestCase
+  def make_tracker(name, template)
+    CacheDigests::DependencyTracker::ERBTracker.new(name, template)
+  end
 
   def test_dependency_of_erb_template_with_number_in_filename
-    tracker.register_tracker(:erb, CacheDigests::DependencyTracker::ERBTracker)
     template = FakeTemplate.new("<%# render 'messages/message123' %>", :erb)
-    dependencies = tracker.find_dependencies("messages/message123", template)
-    assert_equal ["messages/message123"], dependencies
-    tracker.remove_tracker(:erb)
+    tracker = make_tracker('messages/_message123', template)
+
+    assert_equal ["messages/message123"], tracker.dependencies
+  end
+
+  def test_finds_dependency_in_correct_directory
+    template = FakeTemplate.new("<%# render(message.topic) %>", :erb)
+    tracker = make_tracker('messages/_message', template)
+
+    assert_equal ["topics/topic"], tracker.dependencies
+  end
+
+  def test_finds_dependency_in_correct_directory_with_underscore
+    template = FakeTemplate.new("<%# render(message_type.messages) %>", :erb)
+    tracker = make_tracker('message_types/_message_type', template)
+
+    assert_equal ["messages/message"], tracker.dependencies
   end
 end
+
