@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name    = 'cache_digests'
-  s.version = '0.3.0'
+  s.version = '0.3.1'
   s.author  = 'David Heinemeier Hansson'
   s.email   = 'david@37signals.com'
   s.summary = 'Nested fragment caches with (even) less situps'
