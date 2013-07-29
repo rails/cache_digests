@@ -26,7 +26,7 @@ Russian-doll caching schemes are hard to maintain when nested templates are upda
 <% cache [ "v1", todolist ] do %>
   My todolist: <%= todolist.name %>
 
-  <%= render document.comments %>
+  <%= render todolist.comments %>
 <% end %>
 
 # app/views/comments/_comment.html.erb
