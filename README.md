@@ -1,3 +1,9 @@
+Now part of Rails
+=================
+
+This repo is no longer maintained as the feature has been included directly into Rails. It's only here for people who were using it before we included it in Rails.
+
+
 Cache Digests
 =============
 
