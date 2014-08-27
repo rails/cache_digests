@@ -60,7 +60,7 @@ module CacheDigests
       end
 
       def template
-        @template ||= finder.find(logical_name, [], partial?, formats: [ format ])
+        @template ||= finder.find(logical_name, [], partial?, [], formats: [ format ])
       end
 
       def dependency_digest
