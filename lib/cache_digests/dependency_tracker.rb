@@ -38,7 +38,7 @@ module CacheDigests
       RENDER_DEPENDENCY = /
         render\s*                     # render, followed by optional whitespace
         \(?                           # start an optional parenthesis for the render call
-        (partial:|:partial\s+=>)?\s*  # naming the partial, used with collection -- 1st capture
+        (partial:|:partial\s+=>|layout:|:layout\s+=>)?\s*  # naming the partial, used with collection -- 1st capture
         ([@a-z"'][@\w\/\."']+)        # the template name itself -- 2nd capture
       /x
 

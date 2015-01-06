@@ -89,6 +89,12 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     end
   end
   
+  def test_layout_dependency
+    assert_digest_difference("layouts/index") do
+      change_template("layouts/_shared")
+    end
+  end
+
   def test_directory_depth_dependency
     assert_digest_difference("level/below/index") do
       change_template("level/below/_header")
