@@ -11,7 +11,8 @@ module CacheDigests
     cattr_accessor(:logger, instance_reader: true)
 
     def self.digest(name, format, finder, options = {})
-      cache_key = [ "digestor", cache_prefix, name, format, *Array.wrap(options[:dependencies]) ].compact.join("/")
+      details_key = finder.details_key.hash
+      cache_key = [ "digestor", cache_prefix, name, details_key, format, *Array.wrap(options[:dependencies]) ].compact.join("/")
       cache.fetch(cache_key) do
         cache.write(cache_key, nil) # Prevent re-entry
         new(name, format, finder, options).digest

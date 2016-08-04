@@ -20,6 +20,16 @@ end
 class FixtureFinder
   FIXTURES_DIR = "#{File.dirname(__FILE__)}/fixtures"
   TMP_DIR      = "#{File.dirname(__FILE__)}/tmp"
+
+  attr_reader :details
+
+  def initialize
+    @details = {}
+  end
+
+  def details_key
+    @details
+  end
   
   def find(logical_name, keys, partial, options)
     FixtureTemplate.new("#{TMP_DIR}/#{partial ? logical_name.gsub(%r|/([^/]+)$|, '/_\1') : logical_name}.#{options[:formats].first}.erb")
@@ -121,6 +131,20 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     assert_equal '', digest("nothing/there")
   end
 
+  def test_uses_details_key_in_cache
+    # Cache the template digest.
+    old_digest = digest("events/_event")
+
+    # Change the template; the cached digest remains unchanged.
+    change_template("events/_event")
+
+    # The details are changed, so a new cache key is generated.
+    finder.details[:foo] = "bar"
+
+    # The cache is busted.
+    assert old_digest != digest("events/_event")
+  end
+
   def test_collection_dependency
     assert_digest_difference("messages/index") do
       change_template("messages/_message")
@@ -162,7 +186,11 @@ class TemplateDigestorTest < MiniTest::Unit::TestCase
     end
   
     def digest(template_name, options={})
-      CacheDigests::TemplateDigestor.digest(template_name, :html, FixtureFinder.new, options)
+      CacheDigests::TemplateDigestor.digest(template_name, :html, finder, options)
+    end
+
+    def finder
+      @finder ||= FixtureFinder.new
     end
     
     def change_template(template_name)
